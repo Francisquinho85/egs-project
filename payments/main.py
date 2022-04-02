@@ -1,14 +1,17 @@
 
-#run this program with python3 -m uvicorn main:app --reload
+#run this program with python3.7 -m uvicorn main:app --reload
 # main.py
+from ctypes.util import find_library
 import models
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, Depends
 from pydantic import BaseModel
 import json
 from fastapi_versioning import VersionedFastAPI, version
 from typing import Optional
 from sqlalchemy.orm import Session
 from database import SessionLocal,engine
+from models import Payments
+from datetime import date
 
 app = FastAPI()
 
@@ -23,20 +26,42 @@ class Payment(BaseModel):
     amount: float
     payMethod: str
     nif: Optional[int] = None
-    date: int
+    date: str
+
+def get_db():
+    try:
+        db = SessionLocal()
+        yield db
+    finally:
+        db.close()
 
 @app.post("/registPayments")
 @version(1)
-def regist_payments(amount: float, payMethod: str):
-    with open("paymentdb.json","r") as json_file:    
-        json_data = json.load(json_file)
-    if json_data:
-        #check if amount is present
-        if json_data.get(amount): 
-            return None
-    else:
-        return None
+def regist_payments(payment_request: Payment, db: Session = Depends(get_db)):
 
+    payment = Payments()
+
+    payment.amount = payment_request.amount
+    payment.date = payment_request.date
+    # if payment_request.date:
+    #     payment.date = payment_request.date
+    # else:
+    #     today = date.today()
+    #     # dd-mm-YY
+    #     d1 = today.strftime("%d-%m-%Y")
+    #     payment.date = d1
+    payment.nif = payment_request.nif
+    payment.payMethod = payment_request.payMethod
+
+    db.commit()
+
+    return {
+        "code" : "success",
+        "message" : "payments registed"
+    }
+
+
+# byConsumer,byDay,byHour
 @app.get("/transactions")
 @version(1)
 def list_transactions(by: str):
@@ -45,23 +70,6 @@ def list_transactions(by: str):
     # if by == "Hour":
     # if by == "intervalo de montates"
     return {"item_list": "ALLLL12312312"}
-
-#@app.get("/listTransactionsByConsumer")
-# @version(1)
-# def list_byconsumer(item_id: int, q: str = None):
-#     return {"item_id": item_id, "q": q}
-
-# @app.get("/listTransactionsByDay")
-# @version(1)
-# def list_byday(item_id: int, q: str = None):
-#     return {"item_id": item_id, "q": q}
-
-# @app.get("/listTransactionsByHour")
-# @version(1)
-# def list_byhour(item_id: int, q: str = None):
-#     return {"item_id": item_id, "q": q}
-# 
-
 # @app.delete("/event/{event_id}")
 # @version(1)
 # def delete_event(event_id: int):
