@@ -2,18 +2,23 @@ from pydantic import BaseModel
 from typing import Optional
 
 class Provider(BaseModel):
+    id: int
     name: str
     contact: int
     mail: str
+    class Config:
+        orm_mode = True
 
 class Product(BaseModel):
-    name: str
     id: int
+    name: str
     location: str
     price: int
     quantity: int
     type: str
     provider: Provider
+    class Config:
+        orm_mode = True
 
 class UpdateProduct(BaseModel):
     name: Optional[str] = None
