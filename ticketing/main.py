@@ -1,119 +1,75 @@
 #run this program with python3 -m uvicorn main:app --reload
 
 
-from fastapi import FastAPI, Path
-from pydantic import BaseModel
-from enum import Enum
+from fastapi import Depends, FastAPI
 from fastapi_versioning import VersionedFastAPI, version
-from typing import Optional
+from fastapi import HTTPException
+from sqlalchemy.orm import Session
+
+from database import SessionLocal, engine
+import crud, models, schemas
+
+models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
-tickets = {}
-events = {}
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
-class Event(BaseModel):
-    name: str
-    location: str
-    date: int
-    number_tickets: int
-    ticket_price: float
-
-class UpdateEvent(BaseModel):
-    name: Optional[str] = None
-    location: Optional[str] = None
-    date: Optional[int] = None
-    number_tickets: Optional[int] = None
-    ticket_price: Optional[float] = None
-
-class TicketStatus(int, Enum):
-    free = "0"
-    reserved = "1"
-    paid = "2"
-
-class Ticket(BaseModel):
-    event_id: int
-    nif: int
-    status: Optional[TicketStatus] = 1
-    name: Optional[str] = None
-
-@app.get("/event/{event_id}")
+@app.get("/event/{event_id}", response_model=schemas.Event)
 @version(1)
-def get_event(event_id: int):
-    if event_id in events:
-        return events[event_id]
-    return {"Error": "Event ID not found"}
+def get_event_by_id(event_id: int, db: Session = Depends(get_db)):
+    return crud.get_event_by_id(db, event_id)
 
-@app.post("/event/")
+@app.get("/events/", response_model=list[schemas.Event])
 @version(1)
-def create_event(event: Event, event_id: int = Path(..., description="The ID of the event to create")):
-    if event_id in events:
-        return {"Error: Event ID already exists"}
-    events[event_id] = event
-    return events[event_id]
+def get_events(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    return crud.get_events(db, skip, limit)
+
+@app.post("/event/", response_model=schemas.Event)
+@version(1)
+def create_event(event: schemas.Event, db: Session = Depends(get_db)):
+    return crud.create_event(db, event)
 
 @app.put("/event/{event_id}")
 @version(1)
-def update_event(event_id: int, event: UpdateEvent):
-    if event_id not in events:
-        return {"Error: Event ID does not exist"}
-
-    if event.name != None:
-        events[event_id].name = event.name
-    if event.location != None:
-        events[event_id].location = event.location
-    if event.date != None:
-        events[event_id].date = event.date
-    if event.ticket_price != None:
-        events[event_id].price = event.ticket_price
-    if event.number_tickets != None:
-        events[event_id].tickets = event.number_tickets
-    return events[event_id]
+def update_event(event_id: int, event: schemas.UpdateEvent, db: Session = Depends(get_db)):
+    return crud.update_event(db, event, event_id)
 
 @app.delete("/event/{event_id}")
 @version(1)
-def delete_event(event_id: int):
-    if event_id in events:
-        del events[event_id]
-        return {"Success": "Event deleted"}
-    return {"Error:" "Event ID not found"}
+def delete_event(event_id: int, db: Session = Depends(get_db)):
+    return crud.delete_event(db, event_id)
 
 @app.post("/ticket/")
 @version(1)
-def buy_ticket(ticket: Ticket, ticket_id: int):
-    if ticket_id in tickets:
-        return {"Error": "Ticket ID already exists"}
-    tickets[ticket_id] = ticket
-    return tickets[ticket_id]
+def buy_ticket(ticket: schemas.Ticket, ticket_id: int, db: Session = Depends(get_db)):
+    return crud.create_ticket(db, ticket_id)
 
 @app.get("/ticket/{ticket_id}")
 @version(1)
-def get_ticket(ticket_id: int):
-    if ticket_id in tickets:
-        return tickets[ticket_id]
-    return {"Error": "Ticket ID not found" }
+def get_ticket_by_id(ticket_id: int, db: Session = Depends(get_db)):
+    return crud.get_ticket_by_id(db, ticket_id)
 
-@app.put("/ticket/{ticket_id}/")
+@app.get("/tickets/")
 @version(1)
-def update_ticket(ticket_id: int, ticket: Ticket):
-    if ticket_id not in tickets:
-        return {"Error": "Ticket ID not found" }
+def get_tickets(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    return crud.get_tickets(db, skip, limit)
 
-    if ticket.nif != None:
-        tickets[ticket_id].nif = ticket.nif
-    if ticket.status != None:
-        tickets[ticket_id].status = ticket.status
-    if ticket.name != None:
-        tickets[ticket_id].name = ticket.name
-    return tickets[ticket_id]
-
-@app.post("/ticket/pay")
+@app.put("/ticket/{ticket_id}")
 @version(1)
-def buy_ticket(ticket: Ticket, ticket_id: int):
-    if ticket_id in tickets:
-        return {"Error": "Ticket ID already exists"}
-    tickets[ticket_id] = ticket
-    return tickets[ticket_id]
+def update_ticket(ticket_id: int, ticket: schemas.Ticket, db: Session = Depends(get_db)):
+    return crud.delete_event(db, ticket, ticket_id)
+
+@app.post("/ticket/{ticket_id}/pay/")
+@version(1)
+def pay_ticket(ticket_id: int):
+    #paymentService.pay(ticket_id, amount, nif)
+    return {"Success": "Ticket paid successfully"}
 
 app = VersionedFastAPI(app,
     version_format='{major}',
