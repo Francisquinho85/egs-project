@@ -11,6 +11,7 @@ class Payments(Base):
     payMethod = Column(String)
     nif = Column(Integer)
     date = Column(String)
+    hour = Column(String)
 
 
 #https://youtu.be/ESVwKQLldjg?t=450

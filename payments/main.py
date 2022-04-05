@@ -11,7 +11,7 @@ from typing import Optional
 from sqlalchemy.orm import Session
 from database import SessionLocal,engine
 from models import Payments
-from datetime import date
+from datetime import *
 
 app = FastAPI()
 
@@ -26,7 +26,8 @@ class Payment(BaseModel):
     amount: float
     payMethod: str
     nif: Optional[int] = None
-    date: str
+    date: Optional[str] = None
+    hour: Optional[str] = None
 
 def get_db():
     try:
@@ -42,17 +43,29 @@ def regist_payments(payment_request: Payment, db: Session = Depends(get_db)):
     payment = Payments()
 
     payment.amount = payment_request.amount
-    payment.date = payment_request.date
-    # if payment_request.date:
-    #     payment.date = payment_request.date
-    # else:
-    #     today = date.today()
-    #     # dd-mm-YY
-    #     d1 = today.strftime("%d-%m-%Y")
-    #     payment.date = d1
+    
+    #se nao especificar data fica com a data atual e hora igual
+
+    #   xx-xx-xxxx    
+    if payment_request.date:
+        payment.date = payment_request.date
+    else:
+        today = date.today()
+        #dd-mm-YY
+        d1 = today.strftime("%d-%m-%Y")
+        payment.date = d1
+
+    #   XX:XX
+    if payment_request.hour:
+        payment.hour = payment_request.hour
+    else:
+        time = datetime.strptime("03/02/21 16:30", "%d/%m/%y %H:%M")
+        time = ("{:d}:{:02d}".format(time.hour, time.minute))
+        payment.hour = time
     payment.nif = payment_request.nif
     payment.payMethod = payment_request.payMethod
 
+    db.add(payment)
     db.commit()
 
     return {
@@ -65,11 +78,19 @@ def regist_payments(payment_request: Payment, db: Session = Depends(get_db)):
 @app.get("/transactions")
 @version(1)
 def list_transactions(by: str):
-    # if by == "Consumer":
-    # if by == "Day":
+    if by == "Consumer":
+        return {
+            "code" : "success",
+            "message" : "Consumidor"
+    }
+    if by == "Day":
+        return {
+            "code" : "success",
+            "message" : "Dia"
+    }
     # if by == "Hour":
     # if by == "intervalo de montates"
-    return {"item_list": "ALLLL12312312"}
+
 # @app.delete("/event/{event_id}")
 # @version(1)
 # def delete_event(event_id: int):
