@@ -113,9 +113,9 @@ async def list_transactions(list_by: str,list_value: str,list_value2: str=None, 
 
         
 
-@app.delete("/event/{event_id}")
+@app.delete("/deletePayment")
 @version(1)
-def delete_event(delete_request: Payment, db: Session = Depends(get_db)):
+def delete_payment(delete_request: Payment, db: Session = Depends(get_db)):
 
     event = db.query(models.Payments).filter(models.Payments.amount == delete_request.amount,models.Payments.payMethod==delete_request.payMethod,models.Payments.date==delete_request.date,
     models.Payments.hour==delete_request.hour,models.Payments.nif==delete_request.nif)
