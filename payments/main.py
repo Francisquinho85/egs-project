@@ -12,13 +12,11 @@ from sqlalchemy.orm import Session
 from database import SessionLocal,engine
 from models import Payments
 from datetime import *
+from fastapi import HTTPException, status
 
 app = FastAPI()
 
 models.Base.metadata.create_all(bind=engine)
-# @app.get("/")
-# async def root():
-#     return {"message": "Hello World"}
 
 
 # valor a pagar, numerario/mb/...
@@ -28,6 +26,10 @@ class Payment(BaseModel):
     nif: Optional[int] = None
     date: Optional[str] = None
     hour: Optional[str] = None
+
+class ListRequest(BaseModel):
+    list_by: str
+    list_value: str
 
 def get_db():
     try:
@@ -77,27 +79,55 @@ def regist_payments(payment_request: Payment, db: Session = Depends(get_db)):
 # byConsumer,byDay,byHour
 @app.get("/transactions")
 @version(1)
-def list_transactions(by: str):
-    if by == "Consumer":
-        return {
-            "code" : "success",
-            "message" : "Consumidor"
-    }
-    if by == "Day":
-        return {
-            "code" : "success",
-            "message" : "Dia"
-    }
-    # if by == "Hour":
-    # if by == "intervalo de montates"
+async def list_transactions(list_by: str,list_value: str,list_value2: str=None, db: Session = Depends(get_db)):
+    if list_by == "Amount" and list_value2 == None:
+        event = db.query(models.Payments).filter(models.Payments.amount == list_value).all()
+        if not event:
+            raise HTTPException(status_code= status.HTTP_404_NOT_FOUND, detail= f"Events with the amount {list_value} is not available")
+        return event
+    if list_by == "NIF":
+        event = db.query(models.Payments).filter(models.Payments.nif == list_value).all()
+        if not event:
+            raise HTTPException(status_code= status.HTTP_404_NOT_FOUND, detail= f"Events with the NIF {list_value} is not available")
+        return event
+    if list_by == "Day" and list_value2 == None:
+        dia = db.query(models.Payments).filter(models.Payments.date==list_value).all()
+        if not dia:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f'No day found')
+        return dia
+    if list_by == "Hour" and list_value2 == None:
+        hour = db.query(models.Payments).filter(models.Payments.hour==list_value).all()
+        if not hour:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f'Hour not avaliable')
+        return hour
+    if list_by == "Amounts":
+        amounts = db.query(models.Payments).filter(Payments.amount.between(list_value,list_value2)).all()
+        if not amounts:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f'This interval of amounts is not avaliable')
+        return amounts
+    #if list_by == "Dates":
+    #    dates = db.query(models.Payments).filter(Payments.date.between(list_value,list_value2)).all()
+    #    if not dates:
+    #        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f'This interval of dates is not avaliable')
+    #    return dates
 
-# @app.delete("/event/{event_id}")
-# @version(1)
-# def delete_event(event_id: int):
-#     if event_id in events:
-#         del events[event_id]
-#         return {"Success": "Event deleted"}
-#     return {"Error:" "Event ID not found"}
+        
+
+@app.delete("/deletePayment")
+@version(1)
+def delete_payment(delete_request: Payment, db: Session = Depends(get_db)):
+
+    event = db.query(models.Payments).filter(models.Payments.amount == delete_request.amount,models.Payments.payMethod==delete_request.payMethod,models.Payments.date==delete_request.date,
+    models.Payments.hour==delete_request.hour,models.Payments.nif==delete_request.nif)
+
+    event.delete(synchronize_session=False)
+
+    db.commit()
+
+    return {
+        "code": "success",
+        "message": "Event Deleted"
+    }
 
 app = VersionedFastAPI(app,
     version_format='{major}',
