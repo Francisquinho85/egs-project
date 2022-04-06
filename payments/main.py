@@ -61,7 +61,7 @@ def regist_payments(payment_request: Payment, db: Session = Depends(get_db)):
     if payment_request.hour:
         payment.hour = payment_request.hour
     else:
-        time = datetime.strptime("03/02/21 16:30", "%d/%m/%y %H:%M")
+        time = datetime.now()
         time = ("{:d}:{:02d}".format(time.hour, time.minute))
         payment.hour = time
     payment.nif = payment_request.nif
@@ -117,8 +117,17 @@ async def list_transactions(list_by: str,list_value: str,list_value2: str=None, 
 @version(1)
 def delete_payment(delete_request: Payment, db: Session = Depends(get_db)):
 
-    event = db.query(models.Payments).filter(models.Payments.amount == delete_request.amount,models.Payments.payMethod==delete_request.payMethod,models.Payments.date==delete_request.date,
-    models.Payments.hour==delete_request.hour,models.Payments.nif==delete_request.nif)
+    #event = db.query(models.Payments).filter(models.Payments.amount == delete_request.amount,models.Payments.payMethod==delete_request.payMethod,models.Payments.date==delete_request.date,
+    #models.Payments.hour==delete_request.hour,models.Payments.nif==delete_request.nif)
+
+    event = db.query(models.Payments).filter(models.Payments.amount == delete_request.amount,models.Payments.payMethod==delete_request.payMethod)
+    # nif data hora
+    if delete_request.nif:
+        event.filter(models.Payments.nif==delete_request.nif)
+    if delete_request.date:
+        event.filter(models.Payments.date==delete_request.date)
+    if delete_request.hour:
+        event.filter(models.Payments.hour==delete_request.hour)
 
     event.delete(synchronize_session=False)
 
