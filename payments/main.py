@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session
 from database import SessionLocal,engine
 from models import Payments
 from datetime import *
+from fastapi import HTTPException, status
 
 app = FastAPI()
 
@@ -28,6 +29,10 @@ class Payment(BaseModel):
     nif: Optional[int] = None
     date: Optional[str] = None
     hour: Optional[str] = None
+
+class ListRequest(BaseModel):
+    list_by: str
+    list_value: str
 
 def get_db():
     try:
@@ -77,27 +82,36 @@ def regist_payments(payment_request: Payment, db: Session = Depends(get_db)):
 # byConsumer,byDay,byHour
 @app.get("/transactions")
 @version(1)
-def list_transactions(by: str):
-    if by == "Consumer":
+async def list_transactions(list_request: ListRequest, db: Session = Depends(get_db)):
+    if list_request.list_by == "Consumer":
+        #return print(db.query(models.Payments).filter(models.Payments.hour==hora))
         return {
             "code" : "success",
             "message" : "Consumidor"
-    }
-    if by == "Day":
-        return {
-            "code" : "success",
-            "message" : "Dia"
-    }
+        }
+    if list_request.list_by == "Day":
+        dia = db.query(models.Payments).filter(models.Payments.date==list_request.list_value).first()
+        if not dia:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f'No day found')
+        return dia
     # if by == "Hour":
     # if by == "intervalo de montates"
 
-# @app.delete("/event/{event_id}")
-# @version(1)
-# def delete_event(event_id: int):
-#     if event_id in events:
-#         del events[event_id]
-#         return {"Success": "Event deleted"}
-#     return {"Error:" "Event ID not found"}
+@app.delete("/event/{event_id}")
+@version(1)
+def delete_event(delete_request: Payment, db: Session = Depends(get_db)):
+
+    event = db.query(models.Payments).filter(models.Payments.amount == delete_request.amount,models.Payments.payMethod==delete_request.payMethod,models.Payments.date==delete_request.date,
+    models.Payments.hour==delete_request.hour,models.Payments.nif==delete_request.nif)
+
+    event.delete(synchronize_session=False)
+
+    db.commit()
+
+    return {
+        "code": "success",
+        "message": "Event Deleted"
+    }
 
 app = VersionedFastAPI(app,
     version_format='{major}',
