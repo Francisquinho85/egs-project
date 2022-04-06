@@ -1,7 +1,5 @@
 from pydantic import BaseModel
 from typing import Optional
-from enum import Enum
-
 
 class Event(BaseModel):
     name: str
@@ -24,17 +22,16 @@ class UpdateEvent(BaseModel):
     promotor: Optional[str] = None
     description: Optional[str] = None
 
-class TicketStatus(int, Enum):
-    free = "0"
-    reserved = "1"
-    paid = "2"
-    other = "3"
-
 class Ticket(BaseModel):
     nif: Optional[int] = None
-    status: Optional[TicketStatus] = 1
+    status: Optional[int] = 0
     name: Optional[str] = None
     event_id: int
 
     class Config:
         orm_mode = True
+
+class UpdateTicket(BaseModel):
+    nif: Optional[int] = None
+    status: Optional[int] = 0
+    name: Optional[str] = None

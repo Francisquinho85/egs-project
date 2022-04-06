@@ -1,9 +1,8 @@
-#run this program with python3 -m uvicorn main:app --reload
-
+#run this program with python3 -m uvicorn main:app --reload on Windows
+#or just uvicorn main:app --reload on Linux
 
 from fastapi import Depends, FastAPI
 from fastapi_versioning import VersionedFastAPI, version
-from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 from database import SessionLocal, engine
@@ -47,8 +46,8 @@ def delete_event(event_id: int, db: Session = Depends(get_db)):
 
 @app.post("/ticket/")
 @version(1)
-def buy_ticket(ticket: schemas.Ticket, ticket_id: int, db: Session = Depends(get_db)):
-    return crud.create_ticket(db, ticket_id)
+def create_ticket(ticket: schemas.Ticket, db: Session = Depends(get_db)):
+    return crud.create_ticket(db, ticket)
 
 @app.get("/ticket/{ticket_id}")
 @version(1)
@@ -57,13 +56,13 @@ def get_ticket_by_id(ticket_id: int, db: Session = Depends(get_db)):
 
 @app.get("/tickets/")
 @version(1)
-def get_tickets(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    return crud.get_tickets(db, skip, limit)
+def get_tickets(skip: int = 0, limit: int = 100, nif: int = None, status: int = None, name: str = None, event_id: int = None , db: Session = Depends(get_db)):
+    return crud.get_tickets(db, skip, limit, nif, status, name, event_id)
 
 @app.put("/ticket/{ticket_id}")
 @version(1)
-def update_ticket(ticket_id: int, ticket: schemas.Ticket, db: Session = Depends(get_db)):
-    return crud.delete_event(db, ticket, ticket_id)
+def update_ticket(ticket_id: int, ticket: schemas.UpdateTicket, db: Session = Depends(get_db)):
+    return crud.update_ticket(db, ticket, ticket_id)
 
 @app.post("/ticket/{ticket_id}/pay/")
 @version(1)

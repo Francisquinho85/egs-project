@@ -1,3 +1,4 @@
+from turtle import update
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -20,6 +21,7 @@ def create_event(db: Session, event: schemas.Event):
     db.add(db_event)
     db.commit()
     db.refresh(db_event)
+    create_tickets(db, db_event.id, db_event.number_tickets)
     return db_event
 
 def update_event(db: Session, event: schemas.UpdateEvent, event_id: int):
@@ -58,38 +60,37 @@ def get_ticket_by_id(db: Session, ticket_id: int):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f'Ticket with id {ticket} was not found')
     return ticket
 
-def get_tickets(db: Session, skip: int = 0, limit: int = 100):
+def get_tickets(db: Session,  nif: int, status: int, name: str, event_id: int, skip: int = 0, limit: int = 100):
     tickets = db.query(models.Ticket).offset(skip).limit(limit).all()
     if not tickets:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f'No ticket found')
     return tickets
 
-def create_ticket(db: Session, ticket: schemas.Ticket):
-    db_ticket = models.Event(nif=ticket.nif, status=ticket.status, name=ticket.name, event_id=ticket.event_id)
+def create_tickets(db: Session, event_id: int, n_tickets: int):
+    i = 0
+    while i < n_tickets:
+        create_ticket(db, event_id)
+        i += 1
+    return 0
+
+def create_ticket(db: Session, e_id: int):
+    db_ticket = models.Ticket(nif=None, status=0, name=None, event_id=e_id)
     db.add(db_ticket)
     db.commit()
     db.refresh(db_ticket)
     return db_ticket
 
-def update_ticket(db: Session, ticket: schemas.Ticket, ticket_id: int):
+def update_ticket(db: Session, ticket: schemas.UpdateTicket, ticket_id: int):
     update_ticket = db.query(models.Ticket).filter(models.Ticket.id == ticket_id)
     if not update_ticket.first():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f'Ticket with id {ticket_id} was not found')
     
+    if ticket.nif:
+        update_ticket.update({"nif": ticket.nif})
+    if ticket.status:
+        update_ticket.update({"status": ticket.status})
     if ticket.name:
         update_ticket.update({"name": ticket.name})
-    if ticket.location:
-        update_ticket.update({"location": ticket.location})
-    if ticket.date:
-        update_ticket.update({"date": ticket.date})
-    if ticket.ticket_price:
-        update_ticket.update({"ticket_price": ticket.ticket_price})
-    if ticket.number_tickets:
-        update_ticket.update({"number_tickets": ticket.number_tickets})
-    if ticket.promotor:
-        update_ticket.update({"promotor": ticket.promotor})
-    if ticket.description:
-        update_ticket.update({"description": ticket.description})
     db.commit()
     return update_ticket.first()
 
