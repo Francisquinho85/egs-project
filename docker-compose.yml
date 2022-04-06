@@ -16,6 +16,40 @@ services:
     networks:
       app_subnet:
         ipv4_address: 10.10.1.6
+
+  stock:
+    container_name: stock
+    build:
+      context: stock
+      dockerfile: Dockerfile
+    ports:
+      - 3002:80
+    networks:
+      app_subnet:
+        ipv4_address: 10.10.1.5
+
+  ticketing:
+    container_name: ticketing
+    build:
+      context: ticketing
+      dockerfile: Dockerfile
+    ports:
+      - 3003:80
+    networks:
+      app_subnet:
+        ipv4_address: 10.10.1.4        
+
+  payments:
+    container_name: payments
+    build:
+      context: payments
+      dockerfile: Dockerfile
+    ports:
+      - 3004:80
+    networks:
+      app_subnet:
+        ipv4_address: 10.10.1.4  
+
 networks:
   app_subnet:
     ipam:
