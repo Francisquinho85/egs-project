@@ -13,6 +13,7 @@ from database import SessionLocal,engine
 from models import Payments
 from datetime import *
 from fastapi import HTTPException, status
+from sqlalchemy import Date
 
 app = FastAPI()
 
@@ -50,13 +51,16 @@ def regist_payments(payment_request: Payment, db: Session = Depends(get_db)):
 
     #   xx-xx-xxxx    
     if payment_request.date:
-        payment.date = payment_request.date
+        payment_request.date += " 00:00:00"
+        data = datetime.strptime(payment_request.date,'%d-%m-%Y %H:%M:%S')
+        payment.date = data.date()
     else:
         today = date.today()
         #dd-mm-YY
-        d1 = today.strftime("%d-%m-%Y")
-        payment.date = d1
-
+        #d1 = today.strftime("%d-%m-%Y")
+        #payment.date = d1
+        payment.date = today
+        
     #   XX:XX
     if payment_request.hour:
         payment.hour = payment_request.hour
@@ -105,13 +109,11 @@ async def list_transactions(list_by: str,list_value: str,list_value2: str=None, 
         if not amounts:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f'This interval of amounts is not avaliable')
         return amounts
-    #if list_by == "Dates":
-    #    dates = db.query(models.Payments).filter(Payments.date.between(list_value,list_value2)).all()
-    #    if not dates:
-    #        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f'This interval of dates is not avaliable')
-    #    return dates
-
-        
+    if list_by == "Dates":
+        datas = db.query(models.Payments).filter(Payments.date.between(list_value,list_value2)).all()
+        if not datas:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f'This interval of datas is not avaliable')
+        return datas
 
 @app.delete("/deletePayment")
 @version(1)

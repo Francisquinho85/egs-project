@@ -10,7 +10,7 @@ class Payments(Base):
     amount = Column(Numeric(10,2),index=True)   
     payMethod = Column(String)
     nif = Column(Integer)
-    date = Column(String)
+    date = Column(Date)
     hour = Column(String)
 
 
