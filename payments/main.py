@@ -1,5 +1,6 @@
 
 #run this program with python3.7 -m uvicorn main:app --reload
+#windows -> uvicorn main:app --reload
 # main.py
 from ctypes.util import find_library
 import models
@@ -83,37 +84,46 @@ def regist_payments(payment_request: Payment, db: Session = Depends(get_db)):
 # byConsumer,byDay,byHour
 @app.get("/transactions")
 @version(1)
-async def list_transactions(list_by: str,list_value: str,list_value2: str=None, db: Session = Depends(get_db)):
+async def list_transactions(list_by: str,list_value: str, list_value2: str=None, page_num: int = 1,page_size: int = 10,  db: Session = Depends(get_db)):
+    start = (page_num-1) * page_size
+    end = start + page_size
+
     if list_by == "Amount" and list_value2 == None:
         event = db.query(models.Payments).filter(models.Payments.amount == list_value).all()
         if not event:
             raise HTTPException(status_code= status.HTTP_404_NOT_FOUND, detail= f"Events with the amount {list_value} is not available")
-        return event
+        return event[start:end]
     if list_by == "NIF":
         event = db.query(models.Payments).filter(models.Payments.nif == list_value).all()
         if not event:
             raise HTTPException(status_code= status.HTTP_404_NOT_FOUND, detail= f"Events with the NIF {list_value} is not available")
-        return event
+        return event[start:end]
     if list_by == "Day" and list_value2 == None:
         dia = db.query(models.Payments).filter(models.Payments.date==list_value).all()
         if not dia:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f'No day found')
-        return dia
+        return dia[start:end]
     if list_by == "Hour" and list_value2 == None:
         hour = db.query(models.Payments).filter(models.Payments.hour==list_value).all()
         if not hour:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f'Hour not avaliable')
-        return hour
+        return hour[start:end]
     if list_by == "Amounts":
         amounts = db.query(models.Payments).filter(Payments.amount.between(list_value,list_value2)).all()
         if not amounts:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f'This interval of amounts is not avaliable')
-        return amounts
+        return amounts[start:end]
     if list_by == "Dates":
         datas = db.query(models.Payments).filter(Payments.date.between(list_value,list_value2)).all()
         if not datas:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f'This interval of datas is not avaliable')
-        return datas
+        return datas[start:end]
+    if list_by == "ALL":
+        all = db.query(models.Payments).all()
+        if not all:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f'There is no Payments avaliable')
+        return all[start:end]
+
 
 @app.delete("/deletePayment")
 @version(1)
