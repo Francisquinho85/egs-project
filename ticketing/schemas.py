@@ -24,7 +24,7 @@ class UpdateEvent(BaseModel):
 
 class Ticket(BaseModel):
     nif: Optional[int] = None
-    status: Optional[int] = 0
+    status: Optional[int] = None
     name: Optional[str] = None
     event_id: int
 

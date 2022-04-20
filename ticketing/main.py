@@ -56,8 +56,8 @@ def get_ticket_by_id(ticket_id: int, db: Session = Depends(get_db)):
 
 @app.get("/tickets/")
 @version(1)
-def get_tickets(skip: int = 0, limit: int = 100, nif: int = None, status: int = None, name: str = None, event_id: int = None , db: Session = Depends(get_db)):
-    return crud.get_tickets(db, skip, limit, nif, status, name, event_id)
+def get_tickets(nif: int = None, status: int = None, name: str = None, event_id: int = None, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    return crud.get_tickets(db, nif, status, name, event_id, skip, limit)
 
 @app.put("/ticket/{ticket_id}")
 @version(1)

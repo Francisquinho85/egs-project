@@ -1,4 +1,3 @@
-from turtle import update
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -61,10 +60,18 @@ def get_ticket_by_id(db: Session, ticket_id: int):
     return ticket
 
 def get_tickets(db: Session,  nif: int, status: int, name: str, event_id: int, skip: int = 0, limit: int = 100):
-    tickets = db.query(models.Ticket).offset(skip).limit(limit).all()
+    tickets = db.query(models.Ticket)
+    if nif != None:
+        tickets = tickets.filter(models.Ticket.nif == nif)
+    if status != None:
+        tickets = tickets.filter(models.Ticket.status == status)
+    if name != None:
+        tickets = tickets.filter(models.Ticket.name == name)
+    if event_id != None:
+        tickets = tickets.filter(models.Ticket.event_id == event_id)
     if not tickets:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f'No ticket found')
-    return tickets
+    return tickets.offset(skip).limit(limit).all()
 
 def create_tickets(db: Session, event_id: int, n_tickets: int):
     i = 0
