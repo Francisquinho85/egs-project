@@ -3,6 +3,8 @@
 #windows -> uvicorn main:app --reload
 # main.py
 from ctypes.util import find_library
+
+import sqlalchemy
 import models
 from fastapi import FastAPI, Request, Depends
 from pydantic import BaseModel
@@ -10,15 +12,15 @@ import json
 from fastapi_versioning import VersionedFastAPI, version
 from typing import Optional
 from sqlalchemy.orm import Session
-from database import SessionLocal,engine
 from models import Payments
 from datetime import *
 from fastapi import HTTPException, status
 from sqlalchemy import Date
+from database import SessionLocal, engine
 
 app = FastAPI()
 
-models.Base.metadata.create_all(bind=engine)
+models.Base.metadata.create_all(engine)
 
 
 # valor a pagar, numerario/mb/...
@@ -35,6 +37,8 @@ class ListRequest(BaseModel):
 
 def get_db():
     try:
+        db = sqlalchemy.orm.sessionmaker()
+        db.configure(bind=engine)
         db = SessionLocal()
         yield db
     finally:

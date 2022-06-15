@@ -1,7 +1,9 @@
 from sqlalchemy import Column, Date, Float, ForeignKey, Integer, String, Numeric
 
-from database import Base
+from sqlalchemy.ext.declarative import declarative_base
 
+
+Base = declarative_base()
 
 class Payments(Base):
     __tablename__ = "payments"
