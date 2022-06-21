@@ -1,7 +1,8 @@
 from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
-from database import Base
+from stock.database import Base
+
 
 class Provider(Base):
     __tablename__ = "provider"
@@ -26,4 +27,3 @@ class Product(Base):
     provider_id = Column(Integer, ForeignKey("provider.id"))
 
     provider = relationship("Provider", back_populates="products")
-

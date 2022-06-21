@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-stock-ticketing-config
+  namespace: egs3
+data:
+  POSTGRES_DB: app_stock
+  POSTGRES_USER: app_stock
+  POSTGRES_PASSWORD: app_stock
