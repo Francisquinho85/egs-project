@@ -4,6 +4,7 @@
 FROM python:3.9.4-slim
 
 RUN mkdir /stock
+RUN mkdir /stock/www
 # set work directory
 WORKDIR /stock
 
@@ -18,7 +19,11 @@ RUN pip install -r requirements.txt
 # copy project
 COPY . .
 
-# EXPOSE 8080/tcp
+EXPOSE 8080/tcp
 
-# ENTRYPOINT ["uvicorn", "stock.main:app"]
+VOLUME /stock/www
+
+#CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80"]
+#ENTRYPOINT ["uvicorn", "stock.main:app"]
+ENTRYPOINT ["uvicorn", "stock.main:app", "--host", "0.0.0.0", "--port", "8080"]
 

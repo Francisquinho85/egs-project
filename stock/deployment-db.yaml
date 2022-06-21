@@ -1,0 +1,61 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db-stock-ticketing
+  namespace: egs3
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: db-stock-ticketing
+  template:
+    metadata:
+      labels:
+        app: db-stock-ticketing
+    spec:
+      containers:
+        - name: db-stock-ticketing
+          image: postgres:12-alpine
+          ports:
+            - containerPort: 5432
+          envFrom:
+            - configMapRef:
+                name: postgres-stock-ticketing-config
+          volumeMounts:
+            - name: postgres-stock-ticketing-pvc
+              mountPath: /var/www/static
+      restartPolicy: Always
+      volumes:
+        - name: postgres-stock-ticketing-pvc
+          persistentVolumeClaim:
+            claimName: postgres-stock-ticketing-pvc
+
+#Create Service
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: db-stock-ticketing
+  namespace: egs3
+spec:
+  ports:
+    - port: 5432
+      targetPort: 5432
+  selector:
+    app: db-stock-ticketing
+
+#Create Pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-stock-ticketing-pvc
+  namespace: egs3
+spec:
+  resources:
+    requests:
+      storage: 500Mi
+  storageClassName: longhorn
+  accessModes:
+    - ReadWriteOnce
