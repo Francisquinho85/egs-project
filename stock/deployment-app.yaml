@@ -1,0 +1,35 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-stock-ticketing
+  namespace: egs3
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app-stock-ticketing
+  template:
+    metadata:
+      labels:
+        app: app-stock-ticketing
+    spec:
+      containers:
+        - name: app-stock-ticketing
+          image: registry.deti:5000/ticketing/app-stock-ticketing:2022062110
+          ports:
+            - containerPort: 8080
+
+#Create Service
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: app-stock-ticketing
+  namespace: egs3
+spec:
+  ports:
+    - port: 8080
+      targetPort: 8080
+  selector:
+    app: app-stock-ticketing

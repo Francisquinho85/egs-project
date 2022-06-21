@@ -1,0 +1,11 @@
+#Create Config Map
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mariadb-payments-config
+  namespace: egs3
+data:
+  MARIADB_DATABASE: db-payments
+  MARIADB_ROOT_PASSWORD: couto123
+  MARIADB_USER: couto
+  MARIADB_PASSWORD: couto123

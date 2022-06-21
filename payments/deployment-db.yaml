@@ -1,0 +1,62 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db-payments
+  namespace: egs3
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: db-payments
+  template:
+    metadata:
+      labels:
+        app: db-payments
+    spec:
+      containers:
+      - name: db-payments
+        image: mariadb
+        imagePullPolicy: "IfNotPresent"
+        ports:
+        - containerPort: 3306
+        envFrom:
+        - configMapRef:
+            name: mariadb-payments-config
+        volumeMounts:
+        - name: mariadb-payments-pvc
+          mountPath: /var/www/static
+      restartPolicy: Always
+      volumes:
+      - name: mariadb-payments-pvc
+        persistentVolumeClaim:
+            claimName: mariadb-payments-pvc
+
+#Create Service
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: db-payments
+  namespace: egs3
+spec:
+  ports:
+  - port: 3306
+    targetPort: 3306
+  selector:
+    app: db-payments
+
+#Create PVC
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mariadb-payments-pvc
+  namespace: egs3
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: longhorn
+  resources:
+    requests:
+      storage: 500Mi

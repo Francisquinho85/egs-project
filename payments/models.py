@@ -10,10 +10,10 @@ class Payments(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     amount = Column(Numeric(10,2),index=True)   
-    payMethod = Column(String)
+    payMethod = Column(String(16))
     nif = Column(Integer)
     date = Column(Date)
-    hour = Column(String)
+    hour = Column(String(5))
 
 
 #https://youtu.be/ESVwKQLldjg?t=450
