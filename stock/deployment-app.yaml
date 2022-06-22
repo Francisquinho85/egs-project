@@ -16,17 +16,17 @@ spec:
     spec:
       containers:
         - name: app-stock-ticketing
-          image: registry.deti:5000/ticketing/app-stock-ticketing:202206223
+          image: registry.deti:5000/ticketing/app-stock-ticketing:202206224
           ports:
             - containerPort: 8080
           volumeMounts:
-            - name: app-secret
+            - name: stock-secret
               mountPath: "/tmp/secrets"
               readOnly: true
       volumes:
-        - name: app-secret
+        - name: stock-secret
           secret:
-            secretName: app-secret
+            secretName: stock-secret
 
 #Create Service
 ---

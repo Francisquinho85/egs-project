@@ -1,1 +1,1 @@
-kubectl create secret generic app-secret --from-file=secret   -n egs3
+kubectl create secret generic stock-secret --from-file=stock-secret   -n egs3

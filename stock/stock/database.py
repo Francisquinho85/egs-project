@@ -7,7 +7,7 @@ from sqlalchemy.orm import sessionmaker
 SQLALCHEMY_DATABASE_URL = ""
 # SQLALCHEMY_DATABASE_URL = "postgresql://app_stock:app_stock@db:5432/app_stock"
 
-with open("/tmp/secrets/secret", 'r') as f:
+with open("/tmp/secrets/stock-secret", 'r') as f:
     SQLALCHEMY_DATABASE_URL = f.read().strip()
 
 
