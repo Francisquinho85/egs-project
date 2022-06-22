@@ -25,7 +25,7 @@ SQLALCHEMY_DATABASE_URL = ""
 with open("/tmp/secrets/payments-secret", 'r') as f:
     SQLALCHEMY_DATABASE_URL = f.read().strip()
 
-engine = sqlalchemy.create_engine(
+engine = create_engine(
     SQLALCHEMY_DATABASE_URL
 )
 
