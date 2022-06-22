@@ -25,5 +25,5 @@ VOLUME /stock/www
 
 #CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80"]
 #ENTRYPOINT ["uvicorn", "stock.main:app"]
-ENTRYPOINT ["uvicorn", "stock.main:app", "--host", "0.0.0.0", "--port", "8080"]
+CMD ["uvicorn", "stock.main:app", "--host", "0.0.0.0", "--port", "8080"]
 
