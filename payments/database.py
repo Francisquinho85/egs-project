@@ -18,6 +18,15 @@ from sqlalchemy.orm import sessionmaker
 
 # Define the MariaDB engine using MariaDB Connector/Python
 
-engine = sqlalchemy.create_engine("mariadb+mariadbconnector://couto:couto123@db-payments:3306/db-payments")
+#engine = sqlalchemy.create_engine("mariadb+mariadbconnector://couto:couto123@db-payments:3306/db-payments")
+
+SQLALCHEMY_DATABASE_URL = ""
+
+with open("/tmp/secrets/payments-secret", 'r') as f:
+    SQLALCHEMY_DATABASE_URL = f.read().strip()
+
+engine = sqlalchemy.create_engine(
+    SQLALCHEMY_DATABASE_URL
+)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

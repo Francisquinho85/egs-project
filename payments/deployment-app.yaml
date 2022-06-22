@@ -23,6 +23,14 @@ spec:
         envFrom:
         - configMapRef:
             name: mariadb-payments-config 
+        volumeMounts:
+          - name: payments-secret
+            mountPath: "/tmp/secrets"
+            readOnly: true
+      volumes:
+        - name: payments-secret
+          secret:
+            secretName: payments-secret
       restartPolicy: Always
 
 #Create Service

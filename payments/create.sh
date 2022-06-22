@@ -1,0 +1,1 @@
+kubectl create secret generic payments-secret --from-file=payments-secret -n egs3

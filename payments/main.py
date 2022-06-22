@@ -44,9 +44,9 @@ def get_db():
     finally:
         db.close()
 
-@app.post("/registPayments")
+@app.post("/Payment")
 @version(1)
-def regist_payments(payment_request: Payment, db: Session = Depends(get_db)):
+def payment(payment_request: Payment, db: Session = Depends(get_db)):
 
     payment = Payments()
 
@@ -86,9 +86,9 @@ def regist_payments(payment_request: Payment, db: Session = Depends(get_db)):
 
 
 # byConsumer,byDay,byHour
-@app.get("/transactions")
+@app.get("/transaction")
 @version(1)
-async def list_transactions(list_by: str,list_value: str, list_value2: str=None, page_num: int = 1,page_size: int = 10,  db: Session = Depends(get_db)):
+async def transaction(list_by: str,list_value: str, list_value2: str=None, page_num: int = 1,page_size: int = 10,  db: Session = Depends(get_db)):
     start = (page_num-1) * page_size
     end = start + page_size
 
@@ -129,7 +129,7 @@ async def list_transactions(list_by: str,list_value: str, list_value2: str=None,
         return all[start:end]
 
 
-@app.delete("/deletePayment")
+@app.delete("/delPayment")
 @version(1)
 def delete_payment(delete_request: Payment, db: Session = Depends(get_db)):
 
