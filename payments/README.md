@@ -30,7 +30,7 @@ This is a service that manages payments.
 
 # yaml files explanation
 
-deployment-db.yaml launches the Deployment, Service and PersistentVolumeClaim for the Postgres Database </br>
+deployment-db.yaml launches the Deployment, Service and PersistentVolumeClaim for the MariaDB Database </br>
 deployment-conf.yaml launches the ConfigMap with the credentials used by the Database </br>
 deployment-app.yaml launches the Deployment and Service for the main application </br>
 deployment-nginx.yaml launches the Deployment, Service and Ingress for NGINX
