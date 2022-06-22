@@ -17,7 +17,7 @@ spec:
         app: nginx-stock-ticketing
     spec:
       containers:
-        - image: registry.deti:5000/ticketing/nginx-stock-ticketing:2022062110
+        - image: registry.deti:5000/ticketing/nginx-stock-ticketing:202206221
           name: nginx-stock-ticketing
           ports:
             - containerPort: 80

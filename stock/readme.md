@@ -1,10 +1,11 @@
 STOCK
 
-To deploy:
- - sudo docker build -f Dockerfile.app -t registry.deti:5000/ticketing/app-stock-ticketing:2022062110
- - sudo docker build -f Dockerfile.nginx -t registry.deti:5000/ticketing/nginx-stock-ticketing:2022062110
- - sudo docker push registry.deti:5000/ticketing/app-stock-ticketing:2022062110
- - sudo docker push registry.deti:5000/ticketing/nginx-stock-ticketing:2022062110
+To deploy namespace egs3:
+ - sudo docker build -f Dockerfile.app -t registry.deti:5000/ticketing/app-stock-ticketing:202206223
+ - sudo docker build -f Dockerfile.nginx -t registry.deti:5000/ticketing/nginx-stock-ticketing:202206221
+ - sudo docker push registry.deti:5000/ticketing/app-stock-ticketing:202206223
+ - sudo docker push registry.deti:5000/ticketing/nginx-stock-ticketing:202206221
+ - bash create.sh
  - kubectl delete -f deployment-conf.yaml
  - kubectl delete -f deployment-db.yaml
  - kubectl delete -f deployment-app.yaml 
